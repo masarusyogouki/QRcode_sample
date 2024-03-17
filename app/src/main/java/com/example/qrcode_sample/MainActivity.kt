@@ -1,46 +1,35 @@
 package com.example.qrcode_sample
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.qrcode_sample.ui.theme.QRcode_sampleTheme
+import com.google.zxing.integration.android.IntentIntegrator
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            QRcode_sampleTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
-            }
+        setContentView(R.layout.activity_main)
+
+        var qrButton = findViewById<Button>(R.id.scanner)
+
+        // ボタンを押した時にQR読み取り画面に遷移する
+        qrButton.setOnClickListener{
+            IntentIntegrator(this).apply {
+                captureActivity=QRCodeCaptureActivity::class.java
+            }.initiateScan()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        //読み取り結果
+        val result = IntentIntegrator.parseActivityResult(resultCode,data)
+        if (result.contents != null) {
+            Toast.makeText(this, result.contents, Toast.LENGTH_LONG).show()
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    QRcode_sampleTheme {
-        Greeting("Android")
-    }
-}
